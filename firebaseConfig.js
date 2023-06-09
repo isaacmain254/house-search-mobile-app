@@ -28,7 +28,5 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 // initialize cloud firestore
 export const db = getFirestore(app);
-// Initialize cloud storage and get reference to the services
+// Initialize cloud storage and get reference to the services (root reference)
 export const storage = getStorage(app);
-// reference service from the storage service
-const storageRef = ref(storage);

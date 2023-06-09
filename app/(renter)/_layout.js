@@ -18,13 +18,16 @@ export default function Renter() {
       {!isConnected && <NetworkStatus />}
       <Tabs
         backBehavior="history"
-        screenOptions={{ tabBarHideOnKeyboard: true }}
+        screenOptions={{
+          tabBarHideOnKeyboard: true,
+          headerTitleAlign: "center",
+        }}
       >
         <Tabs.Screen
           name="search"
           options={{
             tabBarIcon: () => (
-              <FontAwesome name="search" size={24} color="black" />
+              <FontAwesome name="search" size={24} color="#696969" />
             ),
             tabBarHideOnKeyboard: true,
           }}
@@ -33,7 +36,7 @@ export default function Renter() {
           name="chats"
           options={{
             tabBarIcon: () => (
-              <MaterialIcons name="chat" size={24} color="black" />
+              <MaterialIcons name="chat" size={24} color="#696969" />
             ),
             tabBarBadge: 3,
           }}
@@ -46,7 +49,7 @@ export default function Renter() {
               <Ionicons
                 name="md-person-circle-outline"
                 size={24}
-                color="black"
+                color="#696969"
               />
             ),
           }}

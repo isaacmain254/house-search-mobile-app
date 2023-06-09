@@ -17,12 +17,19 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db, storage } from "../../firebaseConfig";
+import { auth, db, storage } from "../../firebaseConfig";
 import { AuthObserverContext } from "../../hooks/AuthenticationObserver";
-import { ref, uploadBytes, uploadString } from "firebase/storage";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
+import Button from "../../components/button";
+import { signOut } from "firebase/auth";
 
 // default image
-const placeholderImage = require("../../assets/images/mainawambui.jpg");
+const placeholderImage = require("../../assets/images/avatar.jpeg");
 
 export default function Profile() {
   const currentUser = useContext(AuthObserverContext);
@@ -38,6 +45,8 @@ export default function Profile() {
 
   // "tenants" collection with 'iud' as the document  ID
   const currentUserRef = doc(db, "tenants", currentUser.uid);
+  // Reference to image location in Firebase Storage
+  const imageRef = ref(storage, `images/${currentUser.uid}`);
 
   // focus name input on both edit button and textInput press
   const handleNameIconPress = () => {
@@ -73,46 +82,74 @@ export default function Profile() {
       allowsEditing: true,
       quality: 1,
     });
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-      console.log(result.assets[0].uri);
-      uploadImage(result.assets[0].uri);
-      // .then(() => {
-      //   console.log("image upload succcess");
-      // })
-      // .catch((error) => {
-      //   console.log("An error occurred");
-      // });
-    } else {
-      alert("You did not select an Image");
+    try {
+      if (!result.canceled) {
+        const imageuri = result.assets[0].uri;
+        // setSelectedImage(imageuri);
+        // upload image to firebase storage
+        uploadImage(imageuri);
+      } else {
+        alert("You didn't select an image");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  // upload image to firbase firestore
-  const uploadImage = async ({ uri }) => {
+  //function to  upload an image to  Firebase Storage
+  const uploadImage = async (uri) => {
     const response = await fetch(uri);
     const blob = await response.blob();
-    //refernce to firebase storage bucket
-    var storageRef = ref(storage);
-    // upload the blob to firebase storage bucket
-    const uploadTask = await storageRef.child("images").put(blob);
-    uploadTask.on(
-      "state_changed",
-      () => {
-        console.log("upload is running");
-      },
-      (error) => {
-        console.log(error.code);
-      },
-      () => {
-        console.log("image upload success!");
-      }
-    );
+    //upload image to  Firebase Storage
+    uploadBytes(imageRef, blob);
   };
+
+  // fetch image from Firebase Storage and update profile Image
+  const fetchImage = async () => {
+    try {
+      await getDownloadURL(imageRef)
+        .then((url) => {
+          setSelectedImage(url);
+        })
+        .catch((error) => {
+          console.log(error.code);
+        });
+    } catch (error) {
+      console.log("Error fetching image:", error);
+    }
+  };
+
+  // update user details
+  const updateUserDetails = async () => {
+    const docSnap = await getDoc(currentUserRef);
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      console.log("Document data:", userData);
+      console.log(userData.email);
+      setEmail(userData.email);
+      setName(userData.name);
+    }
+  };
+
+  useEffect(() => {
+    fetchImage();
+    updateUserDetails();
+  }, []);
 
   //change profile image to the selected one
   const imageSource =
     selectedImage !== null ? { uri: selectedImage } : placeholderImage;
+
+  //logou function
+  const handleLogOut = () => {
+    signOut(auth)
+      .then(() => {
+        router.push("/login");
+      })
+      .catch((error) => {
+        console.log("An error could not logout", error);
+      });
+  };
 
   return (
     <SafeAreaView style={styles.profileContainer}>
@@ -123,7 +160,7 @@ export default function Profile() {
         <Pressable>
           <FontAwesome5
             name="camera"
-            size={22}
+            size={28}
             color="black"
             style={styles.cameraIcon}
             onPress={pickImageAsync}
@@ -232,6 +269,9 @@ export default function Profile() {
           <FontAwesome name="angle-right" size={22} color="black" />
         </View>
       </Pressable>
+      <View style={styles.logoutButton}>
+        <Button onPress={handleLogOut}>Log Out</Button>
+      </View>
     </SafeAreaView>
   );
 }
@@ -307,5 +347,10 @@ const styles = StyleSheet.create({
   text: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  logoutButton: {
+    alignItems: "center",
+    marginVertical: 25,
+    justifyContent: "center",
   },
 });

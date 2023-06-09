@@ -3,9 +3,15 @@ import { StatusBar } from "expo-status-bar";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../components/button";
+import { useContext } from "react";
+import { AuthObserverContext } from "../hooks/AuthenticationObserver";
 
 export default function App() {
   const router = useRouter();
+  const currentUser = useContext(AuthObserverContext);
+  // if (currentUser !== null) {
+  //   router.push("/search");
+  // }
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
