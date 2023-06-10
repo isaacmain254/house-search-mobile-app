@@ -280,8 +280,8 @@ const length = 100;
 const styles = StyleSheet.create({
   profileContainer: {
     flex: 1,
-    borderWidth: 2,
-    borderColor: "#1e90ff",
+    // borderWidth: 2,
+    // borderColor: "#1e90ff",
   },
   profile: {
     alignItems: "center",
