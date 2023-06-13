@@ -1,5 +1,5 @@
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import Button from "../../components/button";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
+import { RoleContext } from "../../hooks/RoleProvider";
 const { height } = Dimensions.get("window");
 
 export default function Login() {
@@ -23,6 +24,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [Loading, setLoading] = useState(false);
   const router = useRouter();
+  const role = useContext(RoleContext);
 
   // handle authentication with firebase signInWithEmailAndPassword
   const handleLoginPress = async () => {
@@ -36,8 +38,12 @@ export default function Login() {
       );
       setLoading(false);
       const uid = usercredential.user.uid;
+
       if (uid !== null) {
-        router.push("/search");
+        if (role === "landlord") {
+          router.push("/houseRegister");
+        } else if (role === "tenants") router.push("/search");
+        console.log(role);
       }
     } catch (error) {
       console.log(error.message);

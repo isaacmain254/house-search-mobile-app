@@ -3,9 +3,19 @@ import { StatusBar } from "expo-status-bar";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../components/button";
+import { useContext } from "react";
+import { RoleContext } from "../hooks/RoleProvider";
 
 export default function GetStarted() {
   const router = useRouter();
+  const { setRole } = useContext(RoleContext);
+
+  // handleClick to navigate to login screen and setRole landlord/tenant
+  const handleLoginClick = () => {
+    setRole("landlord");
+    router.push({ pathname: "/login", params: { role: { role } } });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
@@ -23,18 +33,26 @@ export default function GetStarted() {
           source={require("../assets/images/start.jpeg")}
         />
       </View>
-      <View
-        style={{
-          position: "absolute",
-          bottom: 60,
-        }}
-      >
-        <Text style={styles.headingText}>Get a house hassle free</Text>
-        <Text style={styles.textStyle}>
-          We save you time and energy of moving around in search of a house
+      <View>
+        <Text style={styles.headingText}>
+          Search or advertise houses hassle free
         </Text>
-        <View style={styles.continueButton}>
-          <Button onPress={() => router.push("/login")}>Get Started</Button>
+        <Text style={styles.textStyle}>
+          We save you time and energy of moving around in search of a house. Are
+          you a landord? We provide a platform to advertise your houses for
+          free.
+        </Text>
+        <View style={styles.callToActionButton}>
+          <View style={{ alignItems: "center" }}>
+            <Button onPress={() => router.push("/login")}>
+              Search for house
+            </Button>
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <Button theme="primary" onPress={handleLoginClick}>
+              Advertise your houses
+            </Button>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -47,12 +65,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 8,
   },
   houseImage: {
-    width: 250,
-    height: 250,
+    width: 200,
+    height: 200,
     alignItems: "center",
-    marginBottom: 120,
+    marginBottom: 18,
   },
   headingText: {
     fontWeight: 600,
@@ -71,9 +90,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 200,
   },
-  continueButton: {
-    alignItems: "center",
+  callToActionButton: {
     marginTop: 40,
+    rowGap: 30,
+    marginBottom: -90,
   },
 });
 
